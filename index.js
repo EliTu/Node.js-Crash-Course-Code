@@ -22,13 +22,16 @@ const server = http.createServer((req, res) => {
 	/* REQUEST */
 
 	// Parsing the URL of the request object, add true to specify that the query will parsed to an object:
-    const pathName = url.parse(req.url, true).pathname;
-    
-    // Parse the query in the URL:
-    const query = url.parse(req.url, true).query;
-    
+	const pathName = url.parse(req.url, true).pathname;
+
+	// Parse the query in the URL:
+	const query = url.parse(req.url, true).query;
+
+	// Get the id parameter from the query:
+	const id = query.id;
+
 	/* Routing */
-	// Routing paths by the pathName value:
+	// Routing different paths by the pathName value:
 	switch (pathName) {
 	// If the pathName is products or home screen then respond with a 200 and some text:
 	case '/products':
@@ -38,8 +41,16 @@ const server = http.createServer((req, res) => {
 		break;
 
 	case '/laptop':
-		res.writeHead(200, { 'Content-type': 'text/html' });
-		res.end('LAPTOP!');
+		// Make sure the query won't exceed the amount of id's that are available in the file (5):
+		if (id < laptopData.length) {
+			res.writeHead(200, { 'Content-type': 'text/html' });
+			// Indicate the number of the id by the id passed in the query:
+			res.end(`Laptop #${id}`);
+		} else {
+			res.writeHead(404, { 'Content-type': 'text/html' });
+			res.end('PAGE NOT FOUND!');
+			break;
+		}
 		break;
 
 		// If the path does not match pathName then respond with a 404:
@@ -51,10 +62,10 @@ const server = http.createServer((req, res) => {
 	/* RESPONSE */
 
 	// writeHead method on the response object allows us to set up a response header with the status code and the options object:
-	res.writeHead(200, { 'Content-type': 'text/html' });
+	// res.writeHead(200, { 'Content-type': 'text/html' });
 
 	// end method on the response object that is the final response:
-	res.end('This is the response');
+	// res.end('This is the response');
 });
 
 // Set a port number, an ip for the server to listen to and an optional callback function:
