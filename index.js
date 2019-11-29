@@ -22,9 +22,32 @@ const server = http.createServer((req, res) => {
 	/* REQUEST */
 
 	// Parsing the URL of the request object, add true to specify that the query will parsed to an object:
-	const query = url.parse(req.url, true);
+    const pathName = url.parse(req.url, true).pathname;
+    
+    // Parse the query in the URL:
+    const query = url.parse(req.url, true).query;
+    
+	/* Routing */
+	// Routing paths by the pathName value:
+	switch (pathName) {
+	// If the pathName is products or home screen then respond with a 200 and some text:
+	case '/products':
+	case '/':
+		res.writeHead(200, { 'Content-type': 'text/html' });
+		res.end('PRODUCTS!');
+		break;
 
-	console.log(query);
+	case '/laptop':
+		res.writeHead(200, { 'Content-type': 'text/html' });
+		res.end('LAPTOP!');
+		break;
+
+		// If the path does not match pathName then respond with a 404:
+	default:
+		res.writeHead(404, { 'Content-type': 'text/html' });
+		res.end('PAGE NOT FOUND!');
+		break;
+	}
 	/* RESPONSE */
 
 	// writeHead method on the response object allows us to set up a response header with the status code and the options object:
@@ -38,5 +61,3 @@ const server = http.createServer((req, res) => {
 server.listen(1337, '127.0.0.1', () =>
 	console.log('Server is listening for requests')
 );
-
-/* Routing */
