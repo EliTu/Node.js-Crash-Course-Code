@@ -37,7 +37,41 @@ const server = http.createServer((req, res) => {
 		case '/products':
 		case '/':
 			res.writeHead(200, { 'Content-type': 'text/html' });
-			res.end('PRODUCTS!');
+
+			// Read the template-overview file asynchronously:
+			fs.readFile(
+				`${__dirname}/templates/template-overview.html`,
+				'utf-8',
+				(err, data) => {
+					try {
+						let overviewOutput = data;
+						// After overview is loaded, read the template-card:
+						fs.readFile(
+							`${__dirname}/templates/template-card.html`,
+							'utf-8',
+							(err, data) => {
+								// Loop over the laptop data in the array and produce a card template for each, then parse it to a string:
+								const cards = laptopData
+									.map(cardHtml =>
+										replaceTemplate(data, cardHtml)
+									)
+									.join('');
+
+								// Replace the placeholder in the overview with the string cards:
+								overviewOutput = overviewOutput.replace(
+									'{%CARDS%}',
+									cards
+								);
+								// Output the result to the page:
+								res.end(overviewOutput);
+							}
+						);
+					} catch {
+						console.log(err);
+					}
+				}
+			);
+
 			break;
 
 		case '/laptop':
@@ -91,6 +125,7 @@ server.listen(1337, '127.0.0.1', () =>
 	console.log('Server is listening for requests')
 );
 
+// Utility function to replace template html with a new html full of laptop data:
 function replaceTemplate(html, laptop) {
 	let output = html.replace(/{%PRODUCTNAME%}/g, laptop.productName);
 	output = output.replace(/{%IMAGE%}/g, laptop.image);
