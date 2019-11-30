@@ -6,10 +6,7 @@ const url = require('url');
 /* FILE SYSTEM */
 
 // readFileSync takes the absolute path to a JSON file, and the char encoding (otherwise it will return "buffer"), this one works synchronously on server init:
-const jsonFile = fs.readFileSync(
-	`${__dirname}/starter/data/data.json`,
-	'utf-8'
-);
+const jsonFile = fs.readFileSync(`${__dirname}/data/data.json`, 'utf-8');
 
 // Parse the JSON object into a JS object:
 const laptopData = JSON.parse(jsonFile);
@@ -30,10 +27,12 @@ const server = http.createServer((req, res) => {
 	// Get the id parameter from the query:
 	const id = query.id;
 
-	/* Routing */
+	/* ROUTING */
+
 	// Routing different paths by the pathName value:
 	switch (pathName) {
 		// If the pathName is products or home screen then respond with a 200 and some text:
+
 		case '/products':
 		case '/':
 			res.writeHead(200, { 'Content-type': 'text/html' });
@@ -105,6 +104,20 @@ const server = http.createServer((req, res) => {
 			}
 			break;
 
+		// To serve an image, first test if the pathName ends with jpg/jpeg/png\gif ,then serve that image based on pathName:
+		case `${/\.(jpg|jpeg|png|gif)$/i.test(pathName) ? pathName : ''}`:
+			if (pathName) {
+				fs.readFile(`${__dirname}/data/img${pathName}`, (err, data) => {
+					res.writeHead(200, { 'Content-type': 'image/jpg' });
+					try {
+						res.end(data);
+					} catch {
+						console.log(err);
+					}
+				});
+			}
+			break;
+
 		// If the path does not match pathName then respond with a 404:
 		default:
 			res.writeHead(404, { 'Content-type': 'text/html' });
@@ -120,10 +133,14 @@ const server = http.createServer((req, res) => {
 	// res.end('This is the response');
 });
 
+/* PORT & LISTEN */
+
 // Set a port number, an ip for the server to listen to and an optional callback function:
 server.listen(1337, '127.0.0.1', () =>
 	console.log('Server is listening for requests')
 );
+
+/* UTIL */
 
 // Utility function to replace template html with a new html full of laptop data:
 function replaceTemplate(html, laptop) {
