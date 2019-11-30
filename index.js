@@ -44,8 +44,6 @@ const server = http.createServer((req, res) => {
 			// Make sure the query won't exceed the amount of id's that are available in the file (5):
 			if (id < laptopData.length) {
 				res.writeHead(200, { 'Content-type': 'text/html' });
-				// Indicate the number of the id by the id passed in the query:
-				// res.end(`Laptop #${id}`);
 
 				// Read the template file asynchronously:
 				fs.readFile(
@@ -55,32 +53,15 @@ const server = http.createServer((req, res) => {
 						try {
 							// data gives us access to the readFile result:
 							const laptop = laptopData[id];
+
 							// Replace the template placeholders with the real data:
-							let output = data.replace(
-								/{%PRODUCTNAME%}/g,
-								laptop.productName
-							);
-							output = output.replace(/{%IMAGE%}/g, laptop.image);
-							output = output.replace(/{%PRICE%}/g, laptop.price);
-							output = output.replace(
-								/{%SCREEN%}/g,
-								laptop.screen
-							);
-							output = output.replace(/{%CPU%}/g, laptop.cpu);
-							output = output.replace(
-								/{%STORAGE%}/g,
-								laptop.storage
-							);
-							output = output.replace(/{%RAM%}/g, laptop.ram);
-							output = output.replace(
-								/{%DESCRIPTION%}/g,
-								laptop.description
-							);
+							const laptopPage = replaceTemplate(data, laptop);
+
 							// At the end, send the template html output as the response:
-							res.end(output);
+							res.end(laptopPage);
 						} catch {
 							console.log(err);
-							res.end(`Oops! an error has occurred: ${er}`);
+							res.end(`Oops! an error has occurred: ${err}`);
 						}
 					}
 				);
@@ -109,3 +90,16 @@ const server = http.createServer((req, res) => {
 server.listen(1337, '127.0.0.1', () =>
 	console.log('Server is listening for requests')
 );
+
+function replaceTemplate(html, laptop) {
+	let output = html.replace(/{%PRODUCTNAME%}/g, laptop.productName);
+	output = output.replace(/{%IMAGE%}/g, laptop.image);
+	output = output.replace(/{%PRICE%}/g, laptop.price);
+	output = output.replace(/{%SCREEN%}/g, laptop.screen);
+	output = output.replace(/{%CPU%}/g, laptop.cpu);
+	output = output.replace(/{%STORAGE%}/g, laptop.storage);
+	output = output.replace(/{%RAM%}/g, laptop.ram);
+	output = output.replace(/{%DESCRIPTION%}/g, laptop.description);
+	output = output.replace(/{%ID%}/g, laptop.id);
+	return output;
+}
